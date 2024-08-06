@@ -1,12 +1,10 @@
-from langchain_core.output_parsers import StrOutputParser
-from ollama_creator import get_instance
-from templates import think_template_prompt, think_simple_template_prompt
 from dotenv import load_dotenv
-from langchain_community.utilities import GoogleSerperAPIWrapper
-from langchain.agents import load_tools, create_tool_calling_agent, AgentExecutor
+from langchain.agents import create_tool_calling_agent, AgentExecutor
+
+from ollama_creator import get_instance
+from templates import think_simple_template_prompt
 
 load_dotenv()
-search = GoogleSerperAPIWrapper()
 
 
 def write_log(text):
@@ -16,15 +14,17 @@ def write_log(text):
 
 write_log("===============================")
 llm = get_instance()
-tools = load_tools(["wikipedia", "llm-math"], llm=llm)
-agent = create_tool_calling_agent(llm, tools, think_simple_template_prompt())
+
+tools = []
+agent = create_tool_calling_agent(
+    llm=llm,
+    tools=tools,
+    prompt=think_simple_template_prompt(),
+)
 
 agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
-answer = agent_executor.invoke({"question": "In what year was the film Departed with Leonardo Dicaprio released? "
-                                            "What is this year raised to the 0.43 power?"})
+answer = agent_executor.invoke({"input": "How much is PI squared"})
 print(answer)
-
-
 
 # chain = think_simple_template_prompt() | get_instance() | StrOutputParser()
 # answer = chain.invoke("why is the sky blue?")

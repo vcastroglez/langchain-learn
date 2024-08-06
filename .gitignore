@@ -1,3 +1,4 @@
 .idea
 .env
 output.log
+/log.txt

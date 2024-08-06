@@ -1,4 +1,4 @@
-from langchain_core.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
 
 
 def think_template():
@@ -20,18 +20,15 @@ def think_template_prompt_format(question, deep=10):
     return think_template_prompt().format(question=question, deep=deep)
 
 
-def think_simple_template():
-    template = """
-    {agent_scratchpad}
-    Question: {question}
-    Think step by step
-    Answer:"""
-    return template
+def think_simple_messages():
+    messages = [
+        ("system", "You answer simple questions"),
+        ("placeholder", "{chat_history}"),
+        ("human", "{input}"),
+        ("placeholder", "{agent_scratchpad}"),
+    ]
+    return messages
 
 
 def think_simple_template_prompt():
-    return PromptTemplate(template=think_simple_template(), input_variables=['agent_scratchpad', 'input', "question"])
-
-
-def think_simple_template_prompt_format(question):
-    return think_simple_template_prompt().format(question=question)
+    return ChatPromptTemplate.from_messages(messages=think_simple_messages())
