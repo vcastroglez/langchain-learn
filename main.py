@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 from langchain.agents import create_tool_calling_agent, AgentExecutor
+from langchain.chains.conversation.base import ConversationChain
 from langchain.chains.llm import LLMChain
 from langchain.chains.llm_math.base import LLMMathChain
 from langchain.tools import StructuredTool
@@ -18,6 +19,14 @@ def write_log(text):
 
 write_log("===============================")
 llm = get_instance()
+# 
+# conversation = ConversationChain(llm=llm, verbose=True)
+# conversation.predict(input="Hi there!")
+# conversation.predict(input="Can we talk about AI?")
+# conversation.predict(input="I'm interested in Reinforcement Learning.")
+# 
+# 
+
 # 
 # question = "Can Barack Obama have a conversation with George Washington?"
 # chain = think_simple_template_prompt() | llm | StrOutputParser()
