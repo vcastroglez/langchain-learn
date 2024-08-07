@@ -1,7 +1,9 @@
 from dotenv import load_dotenv
 from langchain.agents import create_tool_calling_agent, AgentExecutor
+from langchain.chains.llm import LLMChain
 from langchain.chains.llm_math.base import LLMMathChain
 from langchain.tools import StructuredTool
+from langchain_core.output_parsers import StrOutputParser
 
 from ollama_creator import get_instance
 from templates import think_simple_template_prompt, think_math_template_prompt
@@ -16,7 +18,11 @@ def write_log(text):
 
 write_log("===============================")
 llm = get_instance()
-
+# 
+# question = "Can Barack Obama have a conversation with George Washington?"
+# chain = think_simple_template_prompt() | llm | StrOutputParser()
+# answer = chain.invoke({'input': question})
+# print(answer)
 # tools = []
 # agent = create_tool_calling_agent(
 #     llm=llm,
