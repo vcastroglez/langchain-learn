@@ -2,8 +2,8 @@ from dotenv import load_dotenv
 from crewai import Crew
 
 from ollama_creator import get_instance
-from tasks import MeetingPrepTasks
-from agents import MeetingPrepAgents
+from tasks import TasksStack
+from agents import AgentsHiring
 
 
 def main():
@@ -12,42 +12,34 @@ def main():
 	llm = get_instance()
 	print("## Welcome to the Meeting Prep Crew")
 	print('-------------------------------')
-	meeting_participants = input("What are the emails for the participants (other than you) in the meeting?\n")
-	meeting_context = input("What is the context of the meeting?\n")
-	meeting_objective = input("What is your objective for this meeting?\n")
+	app_to_develop = input("What app do you want to develop, state it as an action?\n")
 
-	tasks = MeetingPrepTasks()
-	agents = MeetingPrepAgents()
-
-	# create agents
-	research_agent = agents.research_agent()
-	industry_analysis_agent = agents.industry_analysis_agent()
-	meeting_strategy_agent = agents.meeting_strategy_agent()
-	summary_and_briefing_agent = agents.summary_and_briefing_agent()
+	tasks = TasksStack()
+	agents = AgentsHiring(app_idea=app_to_develop)
 
 	# create tasks
-	research_task = tasks.research_task(research_agent, meeting_participants, meeting_context)
-	industry_analysis_task = tasks.industry_analysis_task(industry_analysis_agent, meeting_participants,
-														  meeting_context)
-	meeting_strategy_task = tasks.meeting_strategy_task(meeting_strategy_agent, meeting_context, meeting_objective)
-	summary_and_briefing_task = tasks.summary_and_briefing_task(summary_and_briefing_agent, meeting_context,
-																meeting_objective)
-
-	meeting_strategy_task.context = [research_task, industry_analysis_task]
-	summary_and_briefing_task.context = [research_task, industry_analysis_task, meeting_strategy_task]
+	research_task = tasks.research_task(agents.research_agent(), app_to_develop)
+	design_task = tasks.design_task(agents.manager_agent(), app_to_develop)
+	develop_backend_task = tasks.develop_backend_task(agents.backend_developer_agent(), app_to_develop)
+	develop_frontend_task = tasks.develop_backend_task(agents.frontend_developer_agent(), app_to_develop)
+	qa_task = tasks.qa_task(agents.qa_specialist_agent(), app_to_develop)
+	writing_code_task = tasks.qa_task(agents.manager_agent(), app_to_develop)
 
 	crew = Crew(
 		agents=[
-			research_agent,
-			industry_analysis_agent,
-			meeting_strategy_agent,
-			summary_and_briefing_agent
+			agents.research_agent(),
+			agents.backend_developer_agent(),
+			agents.frontend_developer_agent(),
+			agents.qa_specialist_agent(),
+			agents.manager_agent(),
 		],
 		tasks=[
 			research_task,
-			industry_analysis_task,
-			meeting_strategy_task,
-			summary_and_briefing_task
+			design_task,
+			develop_backend_task,
+			develop_frontend_task,
+			qa_task,
+			writing_code_task,
 		]
 	)
 
