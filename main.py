@@ -1,75 +1,60 @@
 from dotenv import load_dotenv
-from langchain.agents import create_tool_calling_agent, AgentExecutor
-from langchain.chains.conversation.base import ConversationChain
-from langchain.chains.llm import LLMChain
-from langchain.chains.llm_math.base import LLMMathChain
-from langchain.tools import StructuredTool
-from langchain_core.output_parsers import StrOutputParser
+from crewai import Crew
 
 from ollama_creator import get_instance
-from templates import think_simple_template_prompt, think_math_template_prompt
-
-load_dotenv()
-
-
-def write_log(text):
-    with open('output.log', 'a') as my_file:
-        my_file.write(text + "\n")
+from tasks import MeetingPrepTasks
+from agents import MeetingPrepAgents
 
 
-write_log("===============================")
-llm = get_instance()
-# 
-# conversation = ConversationChain(llm=llm, verbose=True)
-# conversation.predict(input="Hi there!")
-# conversation.predict(input="Can we talk about AI?")
-# conversation.predict(input="I'm interested in Reinforcement Learning.")
-# 
-# 
+def main():
+	load_dotenv()
 
-# 
-# question = "Can Barack Obama have a conversation with George Washington?"
-# chain = think_simple_template_prompt() | llm | StrOutputParser()
-# answer = chain.invoke({'input': question})
-# print(answer)
-# tools = []
-# agent = create_tool_calling_agent(
-#     llm=llm,
-#     tools=tools,
-#     prompt=think_math_template_prompt(),
-# )
-# 
-# agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
-# answer = agent_executor.invoke({"input": "How much is 2 + 5"})
-# write_log(answer['output'])
+	llm = get_instance()
+	print("## Welcome to the Meeting Prep Crew")
+	print('-------------------------------')
+	meeting_participants = input("What are the emails for the participants (other than you) in the meeting?\n")
+	meeting_context = input("What is the context of the meeting?\n")
+	meeting_objective = input("What is your objective for this meeting?\n")
 
-# chain = think_simple_template_prompt() | get_instance() | StrOutputParser()
-# answer = chain.invoke("why is the sky blue?")
-# write_log(answer)
+	tasks = MeetingPrepTasks()
+	agents = MeetingPrepAgents()
 
-# write_log("==========================================================")
-# llm = get_instance()
-# answer = llm.invoke(think_template("Why is the night sky dark?", 3))
-# 
-# write_log(answer.content)
-# llm = get_instance()
-# 
-# messages = [
-#     (
-#         "human",
-#         think_template("Why is the blood red?")
-#     )
-# ]
-# answer = llm.invoke(messages)
-# print(answer)
+	# create agents
+	research_agent = agents.research_agent()
+	industry_analysis_agent = agents.industry_analysis_agent()
+	meeting_strategy_agent = agents.meeting_strategy_agent()
+	summary_and_briefing_agent = agents.summary_and_briefing_agent()
 
-# messages = [
-#     (
-#         "system",
-#         "You are a helpful assistant that translates English to French. Translate the user sentence.",
-#     ),
-#     ("human", "I love programming."),
-# ]
-# 
-# ai_msg = llm.invoke(messages)
-# print(ai_msg)
+	# create tasks
+	research_task = tasks.research_task(research_agent, meeting_participants, meeting_context)
+	industry_analysis_task = tasks.industry_analysis_task(industry_analysis_agent, meeting_participants,
+														  meeting_context)
+	meeting_strategy_task = tasks.meeting_strategy_task(meeting_strategy_agent, meeting_context, meeting_objective)
+	summary_and_briefing_task = tasks.summary_and_briefing_task(summary_and_briefing_agent, meeting_context,
+																meeting_objective)
+
+	meeting_strategy_task.context = [research_task, industry_analysis_task]
+	summary_and_briefing_task.context = [research_task, industry_analysis_task, meeting_strategy_task]
+
+	crew = Crew(
+		agents=[
+			research_agent,
+			industry_analysis_agent,
+			meeting_strategy_agent,
+			summary_and_briefing_agent
+		],
+		tasks=[
+			research_task,
+			industry_analysis_task,
+			meeting_strategy_task,
+			summary_and_briefing_task
+		]
+	)
+
+	result = crew.kickoff()
+
+	print(result)
+
+
+if __name__ == "__main__":
+	main()
