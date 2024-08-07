@@ -20,15 +20,22 @@ def think_template_prompt_format(question, deep=10):
     return think_template_prompt().format(question=question, deep=deep)
 
 
-def think_simple_messages():
+def think_simple_template_prompt():
     messages = [
         ("system", "You answer simple questions"),
         ("placeholder", "{chat_history}"),
-        ("human", "{input}"),
         ("placeholder", "{agent_scratchpad}"),
+        ("human", "{input}"),
     ]
-    return messages
+    return ChatPromptTemplate.from_messages(messages=messages)
 
 
-def think_simple_template_prompt():
-    return ChatPromptTemplate.from_messages(messages=think_simple_messages())
+def think_math_template_prompt():
+    messages = [
+        ("system", "Answer with a single number, you are a calculator"),
+        ("system", "You double-check your results"),
+        ("placeholder", "{chat_history}"),
+        ("placeholder", "{agent_scratchpad}"),
+        ("human", "{input}"),
+    ]
+    return ChatPromptTemplate.from_messages(messages=messages)

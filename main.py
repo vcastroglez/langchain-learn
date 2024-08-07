@@ -1,30 +1,32 @@
 from dotenv import load_dotenv
 from langchain.agents import create_tool_calling_agent, AgentExecutor
+from langchain.chains.llm_math.base import LLMMathChain
+from langchain.tools import StructuredTool
 
 from ollama_creator import get_instance
-from templates import think_simple_template_prompt
+from templates import think_simple_template_prompt, think_math_template_prompt
 
 load_dotenv()
 
 
 def write_log(text):
-    with open('output.log', 'a') as myfile:
-        myfile.write(text + "\n")
+    with open('output.log', 'a') as my_file:
+        my_file.write(text + "\n")
 
 
 write_log("===============================")
 llm = get_instance()
 
-tools = []
-agent = create_tool_calling_agent(
-    llm=llm,
-    tools=tools,
-    prompt=think_simple_template_prompt(),
-)
-
-agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
-answer = agent_executor.invoke({"input": "How much is PI squared"})
-print(answer)
+# tools = []
+# agent = create_tool_calling_agent(
+#     llm=llm,
+#     tools=tools,
+#     prompt=think_math_template_prompt(),
+# )
+# 
+# agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+# answer = agent_executor.invoke({"input": "How much is 2 + 5"})
+# write_log(answer['output'])
 
 # chain = think_simple_template_prompt() | get_instance() | StrOutputParser()
 # answer = chain.invoke("why is the sky blue?")
