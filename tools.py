@@ -38,6 +38,7 @@ class ToolSet:
 
 	@tool
 	def search_serper(query: str):
+		"""Search for a webpage based on the query using Serper."""
 		search = GoogleSerperAPIWrapper()
 		return search.run(f"{query}")
 
